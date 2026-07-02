@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MMA Octagon Arena – Tournament Manager</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- TV Bar -->
+<div class="tv-bar" id="tv-bar">
+  <div class="tv-bar-title">
+    <i class="fa-solid fa-trophy" style="color:var(--gold)"></i>
+    MMA Octagon Arena – Lightweight Grand Prix
+  </div>
+  <button class="btn btn-sm" onclick="toggleTV(false)">
+    <i class="fa-solid fa-arrow-left"></i> Exit TV Mode
+  </button>
+</div>
+
+<!-- Sidebar -->
+<aside id="sidebar">
+  <div class="brand">
+    <div class="brand-ico"><i class="fa-solid fa-fist-raised"></i></div>
+    <div>
+      <div class="brand-name">OCTAGON</div>
+      <div class="brand-sub">Tournament Manager</div>
+    </div>
+  </div>
+
+  <div class="role-card">
+    <div class="role-lbl"><i class="fa-solid fa-shield-halved"></i> Access Role</div>
+    <div class="role-btns">
+      <button class="role-btn active" data-role="admin" onclick="setRole('admin')">Admin</button>
+      <button class="role-btn" data-role="judge" onclick="setRole('judge')">Judge</button>
+    </div>
+  </div>
+
+  <div class="nav-item active" onclick="showPage('dashboard')"><i class="fa-solid fa-gauge-high"></i><span>Dashboard</span></div>
+  <div class="nav-item" onclick="showPage('fighters')"><i class="fa-solid fa-user-ninja"></i><span>Fighters</span></div>
+  <div class="nav-item" onclick="showPage('bracket')"><i class="fa-solid fa-sitemap"></i><span>Bracket</span></div>
+  <div class="nav-item" onclick="showPage('history')"><i class="fa-solid fa-clock-rotate-left"></i><span>History</span></div>
+
+  <div class="sidebar-foot">MMA Octagon v2.0</div>
+</aside>
+
+<!-- Main -->
+<div id="main">
+
+  <!-- DASHBOARD -->
+  <div class="page active" id="page-dashboard">
+    <div class="page-header">
+      <div class="page-title"><h1>Championship Dashboard</h1><p>Overview of the current tournament status and active roster.</p></div>
+      <div class="hdr-actions admin-only">
+        <button class="btn btn-red" onclick="confirmReset()"><i class="fa-solid fa-rotate"></i> Reset Tournament</button>
+      </div>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-card s-red"><div class="stat-ico"><i class="fa-solid fa-user-ninja"></i></div><div><div class="stat-val" id="s-fighters">8</div><div class="stat-lbl">Total Fighters</div></div></div>
+      <div class="stat-card s-cyan"><div class="stat-ico"><i class="fa-solid fa-circle-play"></i></div><div><div class="stat-val" id="s-matches">0 / 7</div><div class="stat-lbl">Matches Played</div></div></div>
+      <div class="stat-card s-gold"><div class="stat-ico"><i class="fa-solid fa-trophy"></i></div><div><div class="stat-val" id="s-champ" style="font-size:1rem;padding-top:4px">TBD</div><div class="stat-lbl">Champion</div></div></div>
+    </div>
+    <div class="hero-banner">
+      <h2>Lightweight Grand Prix</h2>
+      <p>Manage an 8-fighter single-elimination bracket. Log real fight results or auto-simulate using fighter stats. Crown the undisputed champion!</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-cyan" onclick="showPage('bracket')"><i class="fa-solid fa-sitemap"></i> Open Bracket</button>
+        <button class="btn admin-only" id="dash-sim-btn" onclick="runSim()" style="border-color:rgba(59,130,246,.4);color:#60a5fa"><i class="fa-solid fa-wand-magic-sparkles"></i> Auto-Sim Next Fight</button>
+      </div>
+    </div>
+    <div class="dash-grid">
+      <div class="panel">
+        <div class="panel-title"><i class="fa-solid fa-fire-flame-curved" style="color:var(--red)"></i> Next Matchup</div>
+        <div id="dash-next"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-title"><i class="fa-solid fa-list-ol"></i> Top Contenders</div>
+        <div id="dash-top" style="display:flex;flex-direction:column;gap:10px"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FIGHTERS -->
+  <div class="page" id="page-fighters">
+    <div class="page-header">
+      <div class="page-title"><h1>Fighter Pool</h1><p>Manage all registered fighters. Minimum 8 required for tournament.</p></div>
+      <div class="hdr-actions admin-only">
+        <button class="btn btn-red" onclick="openAddFighter()"><i class="fa-solid fa-user-plus"></i> Add Fighter</button>
+      </div>
+    </div>
+    <div class="fighters-grid" id="fighters-grid"></div>
+  </div>
+
+  <!-- BRACKET -->
+  <div class="page" id="page-bracket">
+    <div class="page-header">
+      <div class="page-title"><h1>Tournament Flowchart</h1><p id="bracket-hint">Click glowing matches to log results and advance fighters.</p></div>
+      <div class="hdr-actions">
+        <button class="btn btn-gold btn-sm" onclick="toggleTV(true)"><i class="fa-solid fa-tv"></i> Presenter Mode</button>
+        <button class="btn btn-sm admin-only" onclick="runSim()" style="border-color:rgba(59,130,246,.4);color:#60a5fa"><i class="fa-solid fa-wand-magic-sparkles"></i> Auto-Sim</button>
+      </div>
+    </div>
+    <div class="bracket-wrapper">
+      <div class="bracket-scroll" id="bracket-scroll">
+        <div class="bracket-cols" id="bracket-cols">
+          <!-- Built by JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="page" id="page-history">
+    <div class="page-header">
+      <div class="page-title"><h1>Match Log & Analytics</h1><p>Detailed breakdown of all completed fights.</p></div>
+    </div>
+    <div class="hist-grid">
+      <div class="panel">
+        <div class="panel-title"><i class="fa-solid fa-chart-bar"></i> Win Methods</div>
+        <div class="chart-rows">
+          <div><div class="c-row-lbl"><span>KO / TKO</span><span id="ko-pct">0%</span></div><div class="c-bar-bg"><div class="c-bar-fill ko-fill" id="ko-bar"></div></div></div>
+          <div><div class="c-row-lbl"><span>Submission</span><span id="sub-pct">0%</span></div><div class="c-bar-bg"><div class="c-bar-fill sub-fill" id="sub-bar"></div></div></div>
+          <div><div class="c-row-lbl"><span>Decision</span><span id="dec-pct">0%</span></div><div class="c-bar-bg"><div class="c-bar-fill dec-fill" id="dec-bar"></div></div></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-title"><i class="fa-solid fa-clipboard-list"></i> Fight Results</div>
+        <div class="hist-list" id="hist-list"><div class="empty"><i class="fa-solid fa-calendar-minus"></i><p>No fights completed yet.</p></div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- Confirm Dialog -->
+<div id="confirm-overlay">
+  <div class="confirm-box">
+    <h3 id="confirm-title">Are you sure?</h3>
+    <p id="confirm-msg">This action cannot be undone.</p>
+    <div class="confirm-btns">
+      <button class="btn btn-sm" onclick="closeConfirm(false)">Cancel</button>
+      <button class="btn btn-red btn-sm" id="confirm-ok">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD FIGHTER MODAL -->
+<div class="overlay" id="add-modal">
+  <div class="modal">
+    <div class="m-head"><h3>Add New Contender</h3><button class="m-close" onclick="closeModal('add-modal')">&times;</button></div>
+    <form>
+      <div class="m-body">
+        <div class="fg"><label class="flbl">Fighter Name</label><input class="finp" id="f-name" placeholder="e.g. John 'The Bones' Jones" required></div>
+        <div class="f3">
+          <div class="fg"><label class="flbl">Age</label><input class="finp" id="f-age" type="number" min=18 max=50 value=26 required></div>
+          <div class="fg"><label class="flbl">Height</label><input class="finp" id="f-height" placeholder="5'11&quot;" value="5'10&quot;" required></div>
+          <div class="fg"><label class="flbl">Weight (lbs)</label><input class="finp" id="f-weight" type="number" min=100 max=300 value=155 required></div>
+        </div>
+        <div class="f2">
+          <div class="fg"><label class="flbl">Fighting Style</label>
+            <select class="fsel" id="f-style">
+              <option>Muay Thai</option><option>Brazilian Jiu-Jitsu</option>
+              <option>Wrestling</option><option>Boxing</option>
+              <option>Karate</option><option>Sambo</option><option>All-Rounder</option>
+            </select>
+          </div>
+          <div class="fg"><label class="flbl">Training Gym</label><input class="finp" id="f-gym" placeholder="City Kickboxing" required></div>
+        </div>
+        <div class="f2">
+          <div class="fg"><label class="flbl">Career Wins</label><input class="finp" id="f-wins" type="number" min=0 value=10 required></div>
+          <div class="fg"><label class="flbl">Career Losses</label><input class="finp" id="f-losses" type="number" min=0 value=2 required></div>
+        </div>
+        <div class="fg"><label class="flbl">Skill Ratings</label>
+          <div class="range-grid">
+            <div class="range-wrap"><div class="range-hdr"><span>Striking</span><span id="rv-str">80</span></div><input type="range" id="r-str" min=50 max=99 value=80></div>
+            <div class="range-wrap"><div class="range-hdr"><span>Grappling</span><span id="rv-grp">80</span></div><input type="range" id="r-grp" min=50 max=99 value=80></div>
+            <div class="range-wrap"><div class="range-hdr"><span>Submissions</span><span id="rv-sub">80</span></div><input type="range" id="r-sub" min=50 max=99 value=80></div>
+            <div class="range-wrap"><div class="range-hdr"><span>Stamina</span><span id="rv-stm">80</span></div><input type="range" id="r-stm" min=50 max=99 value=80></div>
+          </div>
+        </div>
+      </div>
+      <div class="m-foot"><button type="button" class="btn btn-sm" onclick="closeModal('add-modal')">Cancel</button><button type="submit" class="btn btn-red btn-sm">Add to Roster</button></div>
+    </form>
+  </div>
+</div>
+
+<!-- LOG MATCH MODAL -->
+<div class="overlay" id="log-modal">
+  <div class="modal">
+    <div class="m-head"><h3 id="log-title">Log Match Outcome</h3><button class="m-close" onclick="closeModal('log-modal')">&times;</button></div>
+    <form>
+      <div class="m-body">
+        <label class="flbl" style="text-align:center;display:block;margin-bottom:10px">Select Winner</label>
+        <div class="corner-select">
+          <div class="corner-card" id="cc-red">
+            <img class="c-avatar" id="log-red-img" src="" alt="">
+            <div class="c-name" id="log-red-name">Red Fighter</div>
+            <span class="c-corner-lbl" style="background:rgba(255,42,95,.1);color:var(--red);border:1px solid rgba(255,42,95,.2)">Red Corner</span>
+          </div>
+          <div class="vs-badge">VS</div>
+          <div class="corner-card" id="cc-blue">
+            <img class="c-avatar" id="log-blue-img" src="" alt="">
+            <div class="c-name" id="log-blue-name">Blue Fighter</div>
+            <span class="c-corner-lbl" style="background:rgba(0,240,255,.1);color:var(--cyan);border:1px solid rgba(0,240,255,.2)">Blue Corner</span>
+          </div>
+        </div>
+        <div class="fg"><label class="flbl">Method of Victory</label>
+          <select class="fsel" id="log-method">
+            <option value="KO/TKO">KO / TKO (Knockout)</option>
+            <option value="Submission">Submission (Tap Out)</option>
+            <option value="Unanimous Decision">Unanimous Decision</option>
+            <option value="Split Decision">Split Decision</option>
+            <option value="Majority Decision">Majority Decision</option>
+            <option value="Doctor Stoppage">Doctor Stoppage</option>
+            <option value="DQ">Disqualification</option>
+          </select>
+        </div>
+        <div class="f2">
+          <div class="fg"><label class="flbl">Round</label>
+            <select class="fsel" id="log-round">
+              <option value=1>Round 1</option><option value=2>Round 2</option>
+              <option value=3>Round 3</option><option value=4>Round 4</option><option value=5>Round 5</option>
+            </select>
+          </div>
+          <div class="fg"><label class="flbl">Time (M:SS)</label><input class="finp" id="log-time" placeholder="2:45" value="1:30" required></div>
+        </div>
+      </div>
+      <div class="m-foot">
+        <button type="button" class="btn btn-sm" onclick="closeModal('log-modal')">Cancel</button>
+        <button type="submit" class="btn btn-red btn-sm" id="log-submit" disabled>Confirm Result</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="mockData.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
